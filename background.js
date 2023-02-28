@@ -1,8 +1,16 @@
-const urlsGood = ['https://www.SEIZE.io/', 'https://seize.io/'];
-const urlsBad  = ['https://www.phishing.io/', 'https://phishing.io/'];
+const communityGoodSites = './urls-good.json';
+const communityBadSites = './urls-bad.json';
+let urlsGood = urlsBad = '';
+
+fetch(communityGoodSites)
+  .then((response) => response.json())
+  .then((sites) => urlsGood = sites);
+
+fetch(communityBadSites)
+  .then((response) => response.json())
+  .then((sites) => urlsBad = sites);
 
 class Unphish {
-
   constructor (tab) {
     const _isThisTab = (site) => {
       return new URL(this.tab.url).hostname === new URL(site).hostname;
@@ -11,10 +19,6 @@ class Unphish {
     this.tab = tab;
     this.tabSafe = urlsGood.some(_isThisTab);
     this.tabDanger = urlsBad.some(_isThisTab);
-  }
-
-  handleClick = (activeTab) => {
-    chrome.scripting.executeScript({ target: { tabId: activeTab.id }, files: ['on-click.js'] });
   }
 
   badge = () => {
@@ -28,34 +32,23 @@ class Unphish {
   }
 
   _badgeSafe = () => {
-    chrome.action.setBadgeBackgroundColor({ color: 'green', tabId: this.tab.id }, () => {
+    chrome.action.setBadgeBackgroundColor({ color: 'lightgreen', tabId: this.tab.id }, () => {
       chrome.action.setBadgeText({ text: 'OK', tabId: this.tab.id });
     });
   }
 
-  _badgeDanger = (tab) => {
-    chrome.action.setBadgeBackgroundColor({ color: 'red', tabId: this.tab.id }, () => {
+  _badgeDanger = () => {
+    chrome.action.setBadgeBackgroundColor({ color: 'hotpink', tabId: this.tab.id }, () => {
       chrome.action.setBadgeText({ text: '!UGH', tabId: this.tab.id });
+      chrome.scripting.executeScript({ target: { tabId: this.tab.id }, files: ['on-danger.js'] });
     });
   }
 
-  _badgeOff = (tab) => {
+  _badgeOff = () => {
     chrome.action.setBadgeText({ text: '', tabId: this.tab.id });
   }
 }
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  console.log('updated');
   new Unphish(tab).badge();
-});
-
-chrome.tabs.onCreated.addListener(tab => {
-  console.log('created');
-  new Unphish(tab).badge();
-});
-
-chrome.action.onClicked.addListener(tab => {
-  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    new Unphish(tabs[0]).handleClick();
-  });
 });

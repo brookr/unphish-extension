@@ -1,8 +1,8 @@
 {
-  "name": "6529 Unphished",
-  "description": "Quick badging for identifying true sites of The Memes community.",
+  "name": "Unphish Extension",
+  "description": "Quick badging for identifying true sites within a community.",
   "homepage_url": "https://github.com/brookr/unphish-extension",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "manifest_version": 3,
   "action": {
     "default_title": "Unphish: Stay Safu!",
@@ -13,24 +13,6 @@
       "128": "images/logo-128.png"
     }
   },
-  "content_scripts": [
-    {
-      "run_at" : "document_start",
-      "js": ["on-start.js"],
-      "matches": [
-        "https://*/*",
-        "http://*/*"
-      ]
-    },
-    {
-      "run_at" : "document_idle",
-      "js": ["on-done.js"],
-      "matches": [
-        "https://*/*",
-        "http://*/*"
-      ]
-    }
-  ],
   "background": {
     "service_worker": "background.js"
   },
